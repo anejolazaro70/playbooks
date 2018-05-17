@@ -1,0 +1,32 @@
+---
+- name: discover mac-address table
+  hosts: ios
+  connection: local
+  gather_facts: no
+
+  vars:
+    provider:
+      username: cisco
+      password: cisco
+      host: "{{ inventory_hostname }}"
+
+  tasks:
+  - name: show mac address table
+    ios_command:
+      commands:
+        - show mac address-table dynamic
+      provider: "{{ provider }}"
+    register: output
+  - name: registra mac-address table
+    set_fact:
+      mac_tab: "{{ output['stdout'][0].splitlines() }}"
+  - name: show mac-address table content
+    debug:
+      msg: "{{ mac_tab[5:-1] }}"
+  - name: save mac-table to file
+    copy:
+      content: "{{ mac_tab[5:-1] }}"
+      dest: ./mac_tables/dev_{{ inventory_hostname }}.json
+
+    
+  
